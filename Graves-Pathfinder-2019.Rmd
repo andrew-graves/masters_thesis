@@ -1,0 +1,573 @@
+---
+title             : "DNA methylation of the oxytocin receptor gene maps increases in conditioned learning rates at the late positive potential"
+shorttitle        : "Learning rates at the late positive potential"
+
+author: 
+  - name          : "Andrew J. Graves"
+    #affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "PO Box 400400, Charlottesville, VA 22904"
+    email         : "ajg3eh@virginia.edu"
+
+affiliation:
+  - #id            : "1"
+    institution   : "University of Virginia"
+
+authornote: |
+  Andrew J. Graves, Department of Psychology, University of Virginia
+
+  This work satisfies the pre-dissertation requirement for doctoral candidacy. I would like to acknowledge James P. Morris for advising this report, Chad S. Dodson for serving as a second reader, Jessica J. Connelly for supplementing my knowledge in epigenetic theory, and Amalia McDonald for training me on epigenetic analysis procedures. The consistent use of third-person tense throughout this paper emphasizes the important contributions of my team throughout development of this research. 
+
+abstract: |
+  Associative learning is a fundamental building block of information acquisition. Organisms learn from environmental cues to detect signals that predict reward or punishment, and update beliefs on how to respond accordingly. Demands on the human brain are uniquely complex, requiring advanced abilities to recognize, manipulate and respond to socially relevant information. This includes the ability to construct representations of environmental contingencies predicting safety and threat. Individual differences contribute to the ability to flexibly learn and update responses appropriately. Here we investigate a potential biological feature for capturing individual differences in associative learning, epigenetic modification (i.e., DNA methylation) of the oxytocin receptor (\textit{OXTR}). Leveraging the sensitivity of slow-wave event-related potentials, we provide new evidence that \textit{OXTR} methylation (\textit{OXTR}m) is theoretically relevant for understanding electrophysiological brain function as it pertains to human associative learning. This work demonstrates modulation of associative learning rates as a function of \textit{OXTR}m indexed by the late positive potential (LPP). The results suggest that oxytocin may play a primitive role in signaling survival behaviors (i.e., approaching appetitive resources, avoiding aversive environments). By integrating theoretical perspectives from psychology, neuroscience, and epigenetics, this work enriches understanding of how the brain reflects oxytocin's allostatic functionality, by investigating its manifestation of fear acquisition embedded in electrophysiological conditioned responses. 
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "DNA methylation, oxytocin receptor, associative learning, cognitive neuroscience, late positive potential, individual differences"
+#wordcount         : "X"
+
+bibliography      : ["pre_dissertation.bib", "r-references.bib"]
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+header-includes   :
+  - \raggedbottom
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+library(papaja)
+library(tidyverse)
+library(extrafont)
+library(magick)
+library(cowplot)
+library(eegUtils)
+library(brms)
+library(bayestestR)
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+Associative learning is a fundamental building block of information acquisition [@Mitchell2009]. Organisms learn from environmental cues to detect signals that predict reward or punishment, and update beliefs on how to respond accordingly [@Gershman2015]. One powerful paradigm for studying associative learning is classical conditioning. Through repeated pairing of a neutral cue with a threatening stimulus, organisms learn to respond to the neutral cue as a function of its predictive utility toward threat. These learned responses can manifest through physiology and behavior. Sources of threat range along a continuum from physical (e.g., electric shock) to biological (e.g., blood), and within biological sources, from less social (e.g., blood) to more social (e.g., anger) [@Lonsdorf2017]. Social demands on the human brain are uniquely complex, requiring advanced abilities to recognize, manipulate and respond to socially relevant information. This includes the ability to construct representations of environmental contingencies predicting safety and threat.
+
+The current work investigates a potential biological feature for capturing individual differences in associative learning, epigenetic modification (i.e., DNA methylation) of the oxytocin receptor (\textit{OXTR}). DNA methylation is a form of epigenetic silencing that downregulates gene transcription. Diminished transcription of \textit{OXTR} can lead to inefficient binding of oxytocin, which can result in downstream mitigation of endogenous oxytocin [@Gregory2009]. Oxytocin is a neuropeptide critical for various biological processes including milk letdown, sexual function, and child birth, as well as psychological processes including social behavior, stress regulation, and affective processing [@Carter2014; @Rotzinger2010; @Neumann2012]. Measuring \textit{OXTR} methylation (\textit{OXTR}m) has advantages over polymorphic variants, as it has known functional control on the genetic expression of \textit{OXTR} [@Kusui2001]. 
+
+In addition to its effect on genetic expression, \textit{OXTR}m relates to functional organization of the human brain on a variety of sensory and cognitive tasks, including selective attention, biological motion, and affective processing [@Puglia2015; @Krol2019; @Puglia2018; @Jack2012]. \textit{OXTR}m may impact representation of social information within specialized cortical structures (e.g., fusiform gyrus, superior temporal sulcus, temporoparietal junction) as well as amygdala activity and functional networks distributed across the brain [@Puglia2015; @Krol2019; @Puglia2018; @Jack2012]. This suggests that the endogenous oxytocin system contributes to how the human brain supports social information. 
+However, it has recently been proposed that oxytocin has a more general effect on basic biological systems that ultimately support complex cognitive constructs that are anticipatory, aversive, and appetitive in nature [@Quintana2019a]. This theoretical perspective is supported with evidence that oxytocin pathway gene expression patterns (including \textit{OXTR}) encode information in activation coordinates embedded in anticipatory, aversive, and appetitive functional atlases from thousands of fMRI experiments [@Quintana2019a; @Yarkoni2011]. These three cognitive states encompass large swaths of social cognition, which may help explain the characterization of oxytocin as a "social hormone". This characterization is not without criticism, due to failed replications and contradictory results [@Lane2015]. Rather, it may be the case that oxytocin plays a fundamental role in mechanisms of associative learning to facilitate allostasis, the process by which the body physiologically responds to stressors in order to regain homeostasis [@Quintana2019]. 
+
+Indeed, researchers have investigated oxytocin's role in conditioning experiments in both animal models and human subjects [@Wang2018; @Hu2015; @Zoicas2014]. Two main findings emerge from this literature, which lead to competing theoretical positions [@Guzman2014; @Toth2012; @Hurlemann2010]. Experimental administration of oxytocin has been linked to facilitating associative learning [@Eckstein2015a]. Facilitated learning leads to greater acquisition of conditioned fear responses and greater resistance to extinguishing conditioned fear responses. Other studies find that oxytocin acts as an anxiolytic mechanism to regulate fear [@Petrovic2008; @Cavalli2017]. The anxiolytic mechanism leads to dampening of conditioned fear responses and expediated extinction of conditioned fear responses [@Eckstein2015]. One potential reason for contradictions in the literature are the different methodological frameworks, which include experimentally manipulating oxytocin via intranasal administration versus genetic modification, among others. In the case of intranasal administration, this method fails to take into account interaction with the endogenous oxytocin system of the organism under study. \textit{OXTR}m acts as a proxy for the function of the endogenous oxytocin system, which likely interacts with binding efficiency of exogenous administration. Failure to measure \textit{OXTR}m is one potential cause for the ambiguity in the literature.
+
+Conditioning experiments typically measure a physiological response as an index for learning [@Mitchell2009]. These measurements range from the skin conductance response, startle response, eye-blinks, as well as event-related potentials (ERP), among others [@Lonsdorf2017; @Skrandies2000]. Many conditioning effects are coupled with propositional knowledge about the contingencies between stimuli [@Mitchell2009]. For this reason, it is imperative that the physiological response is sensitive to the propositional evaluation of the stimulus environment [@Clark1998]. Due to its slow-wave sustenance, tuning within affective processing, relationship with encoded memories, and amenability to conditioning procedures, the late positive potential (LPP) is a good candidate for studying biological individual differences in associative learning paradigms [@Schupp2000; @Rugg1996; @Cuthbert2000; @Pizzagalli2003]. The LPP is an ERP that increases in magnitude as a function of the affective intensity of pictures, remembered versus forgotten items, and fear-conditioned stimuli [@Bacigalupo2018; @Miskovic2012; @Curran2003].  The LPP is maximal at centroparietal (CP) electrodes on the scalp, measurable as early as 400 ms post-stimulus, stable in shape around 700 ms, and typically sustains through stimulus termination [@Cuthbert2000]. Researchers have proposed that the LPP broadly indexes allocation of attentional resources, elaborative encoding, and orientation of perceptual systems [@Friedman2000].
+
+The robust elicitation of the LPP in response to affective pictures affords designing powerful experiments with relatively low levels of between-subjects variance. However, the power of the LPP paradigm is at statistical odds with reliably detecting individual differences in electrophysiological brain function [@Yarkoni2010]. Modeling the change of LPP amplitude across the course of an experiment may generate more between-subjects variance and sensitivity to individual differences. This work proposes an associative learning paradigm that models LPP change across the course of an experiment to model the role of \textit{OXTR}m on individual differences in conditioned learning rates. 
+
+##Current Study
+The primary elements of a human associative learning experiment involve training the research participant to link or bind two events together, the conditioned stimulus (CS) and the unconditioned stimulus (US), while measuring responses toward each event, the conditioned response (CR) and the unconditioned response (UR) respectively. The US is typically a biologically relevant stimulus that innately generates a strong UR, and is either appetitive or aversive. Repeated pairing of the US with an innately neutral stimulus, the CS, causes the CS to begin eliciting a response more similar to the US post conditioning procedures [@Lonsdorf2017]. Theoretical frameworks positing oxytocin as an allostatic hormone that signals anticipatory, appetitive, and aversive states suggest that \textit{OXTR}m may impact brain function as it pertains to human associative learning [@Quintana2019]. By integrating theoretical perspectives from psychology, neuroscience, and epigenetics, we aim to gain a richer appreciation of how the brain represents individual differences in associative learning processes. 
+
+###Hypothesis 1.
+We aim to demonstrate that our experimental paradigm replicates previous research, in that increasing the affective valence of pictures will result in graded increases in amplitude of the LPP [@Cuthbert2000]. We predict that scene CSs will have the smallest LPP, face CSs will have the second smallest LPP, face USs will have the third smallest LPP, and scene USs will have the largest LPP. For this test, we will average over the CS prediction and the CS predictor.
+
+###Hypothesis 2.
+Leveraging the sensitivity of the LPP to conditioning procedures, we hypothesize modulation of associative learning rates as a function of \textit{OXTR}m. Higher levels of \textit{OXTR}m at CpG site -934 within the MT2 promoter region of \textit{OXTR} relate to greater amygdala activity in response to anger and fear, and source localization/ simultaneous fMRI-EEG recordings provide evidence that the LPP and amygdala activation are functionally coupled [@MacNamara2018; @Liu2012; @Puglia2015]. We are scaffolding our hypotheses about how \textit{OXTR}m may impact learning rates on research that measures natural variability within the oxytocin system rather than experimental manipulation through intranasal administration. Thus we predict that increased \textit{OXTR}m will correlate with increased learning rates, represented as steeper transference of LPP magnitude from the US to the CS. We will model the learning rates of each individual as a function of their methylation state at CpG site -934. Statistically, this will be specified in the model as a block x -934 methylation two-way interaction, which assumes that the growth curve of the LPP from the beginning to the end of the experiment can be approximated as a linear function across trial blocks. We expect the slope of this linear approximation to increase as \textit{OXTR}m increases.
+
+As a follow up, we will test whether the social dimension of the stimulus modulates individual differences in learning rates. This will be specified in the model as a stimulus type x block x -934 methylation three-way interaction. Evidence for a three-way interaction would suggest that the social dimension of a stimulus impacts the effect of \textit{OXTR}m on learning rates. Theoretical positions that posit oxytocin as a "social hormone" predict that the social dimension would modulate individual differences in learning rates, while the competing hypothesis of oxytocin as a generalized "allostatic hormone" would predict modulation of learning rates for all affectively threatening stimuli. 
+
+###Exploration of habituation and sensitization.
+In associative learning experiments, interpretation of conditioning effects across blocks can be confounded by habituation or sensitization to the US. To probe for effects of habituation or sensitization, we will generate exploratory plots for both behavioral arousal judgments and the LPP as a function of each stimulus class and their respective block effects. Increased LPP and behavioral arousal across the experiment would suggest sensitization while decreased LPP and behavioral arousal across the experiment would suggest habituation. We make no specific hypotheses about the directionality of these potential confounds, but will use the results from this exploratory analysis to help guide interpretation of the results from hypotheses 1 and 2. 
+
+#Method
+
+##Participants
+71 participants were recruited to complete study procedures from a university participant pool in the United States. Participants that generated no usable EEG data or who failed to yield a successfully methylated sample were excluded, resulting in 63 participants for statistical analysis. 
+
+##Experimental Design
+The experiment was a 2 x 2 (Stimulus Class: Face CS vs. Scene CS; CS Prediction:  Face US vs. Scene US) within-participants design, consisting of 256 trials for measurement of ERP signal. Figure\ \@ref(fig:design) shows a schematic of two example trials. Each experimental condition consisted of 64 two-second trials divided into 8 two-minute blocks of 32 trials, allowing participants to rest and blink their eyes between blocks. Between each block, participants provided valence and arousal judgments for four of the USs viewed throughout the experiment, resulting in a valence and arousal judgment for each US. These judgments were measured on a scale from 1 (less negative/ less aroused) to 9 (more negative/ more aroused). Each trial included CS presentation [1 s] followed by US presentation [1 s]. The stimuli were presented as a trace procedure, with the US immediately following the CS [@Clark2001]. The CS and US were bounded by a thin brown border to clearly delineate the grouping of the CS and US on each trial. The inter-trial interval [ITI] was pseudo-randomly jittered between 800 and 1200 ms. Within each stimulus condition, the CS was the same image throughout the experiment to facilitate reliable prediction of the US class. Each stimulus condition followed a 100% contingency; this design decision was motivated by the low signal-to-noise ratio for any given single ERP trial [@Woodman2010]. Stimuli were presented electronically using the E-Prime 3.0 software (Psychology Software Tools, Pittsburgh, PA).
+
+##Stimulus Materials
+We selected neutral and negative pictures as the CS and US respectively. Scene stimuli were selected from the IAPS database [@Mikels2005] and face stimuli were selected from the NimStim database [@Tottenham2009]. Stimuli from the IAPS and NimStim databases were matched to act as US categories, with 16 of the IAPS stimuli matched with a face CS and a scene CS, and 16 of the NimStim stimuli matched with a different face CS and a different scene CS. The four CSs were selected to be similar in affective and perceptual properties, but clearly distinctive to signal a different US stimulus class prediction.
+
+##EEG Collection Procedures
+EEG was recorded from 32 Ag/AgCl active BioSemi electrodes affixed to an elastic cap (BioSemi, Wilmington, NC) using the 10-20 electrode placement system. The horizontal electrooculogram (EOG) was recorded from an electrode placed at the outer canthus of the right eye. The vertical EOG was recorded from an electrode placed on the supraorbital ridge of the right eye. The participant's head circumference was measured to determine the correct cap size. Electrode offsets were maintained within 20 $\mu$V. EEG was amplified with an ActiveTwo AD-box (BioSemi, Wilmington, NC) and recorded using ActiView605-Hires software with a sampling rate of 2048 Hz and online band-pass filtered between 0.1-100 Hz. Participants were seated approximately 100 cm from a computer monitor and instructed to remain still and keep their eyes on the screen. Participants were given the opportunity to pause and rest their eyes between each block of trials. Data were analyzed offline using EEGLab v14.1.193, ERPLab v7.0.093, and custom pre-processing MATLAB scripts [@Delorme2004; @Lopez-Calderon2014].
+
+##EEG Pre-processing
+Raw EEG data was pre-processed in three scripts, with analyst intervention between each scripted procedure to assess data quality and success of each pre-processing step for each participant. The first procedure read in the data and added channel location coordinates. After the first procedure, clearly problematic channels were excluded from the data to support clean ICA computation. The second procedure referenced the data to mastoid electrodes, applied a band-pass filter (infinite impulse response (IIR) butterworth model; 0.1-30 Hz with 12 db/oct and 40 db/dec], and ran independent-components analysis (ICA; runica algorithm w/ default parameters) to identify eye-blink artifacts in the data. After the second procedure, ICA components were inspected manually to identify clear eye-blink artifacts; if a clear eye-blink component was identified, that component was subtracted from the data. The third procedure corrected for stimulus display latency (45 ms) measured via oscilloscope, generated an event list of stimulus onsets, binned the data from -200 ms to 1000 ms relative to stimulus onset, and algorithmically detected artifacts for removal from the data [Moving window peak-to-peak threshold algorithm; threshold: 100 $\mu$v; window size: 1000 ms; step size: 50 ms]. The latter portion of the LPP (700-1000 ms) was extracted from each bin for data analysis. 
+
+##\textit{OXTR} Methylation Analysis
+Participants provided 5 mL passive drool in a Falcon 50 mL Conical Centrifuge Tube (Fisher Scientific, Hampton, NH) for assessment of saliva methylation. Saliva cells were pelleted in 20 mL 1x phosphate-buffered saline (Life Technologies, Carlsbad, CA) by centrifuging at 1800 rcf for 5 minutes. Pellets were then transferred into a microcentrifuge tube and frozen at -20$^{\circ}$C prior to DNA extraction. We isolated DNA from saliva cells using reagents supplied in the QIAamp DNA Blood Mini Kit (Qiagen, Valencia, CA) following Qiagen's Supplemental Protocol for Isolation of Genomic DNA from Saliva. Two hundred nanograms of DNA was subject to bisulfite treatment (Kit MECOV50, Invitrogen, Carlsbad, CA), which converts non-methylated cytosines to uracil for downstream detection of methylated cytosines by sequencing. We amplified a 116-base pair region of \textit{OXTR} containing CpG Site -934 (hg38, chr3: 8 769 121) via polymerase chain reaction (PCR) using 12 nanograms of bisulfite-converted DNA, 0.2 µM primers TSL101F (5'-TTGAGTTTTGGATTTAGATAATTAAGGATT-3') and TSL101R (5'-biotin-AATAAAATACCTCCCACTCCTTATTCCTAA-3'), and reagents supplied in the Pyromark PCR kit (Qiagen, Valencia, CA). Underlined nucleotides in primer set indicate the insertion of an A or C nucleotide at a variable position (C/T) due to a CpG site within the primer. Samples were amplified on three identical PCR machines (S1000 Thermal Cycler, Biorad, Hercules, CA) with the following cycling conditions [Step 1: (95$^{\circ}$C C/15 min)/1 cycle, Step 2: (94$^{\circ}$C C/30 s, 56$^{\circ}$C C/30 s, 72$^{\circ}$C C/30 s)/50 cycles, Step 3: (72$^{\circ}$C C/10 min)/1 cycle, Step 4: 4$^{\circ}$C C hold]. Pyrosequencing was performed using primer TSL101S (5'- AGAAGTTATTTTATAATTTTT-3') on a Pyromark Q24 using PyroMark Gold Q24 Reagents (Qiagen, Valencia, CA). We included methylation controls at 0, 25, 50, 75, and 100% methylated.
+
+##Data Analysis
+In order to model the dynamic response of the CS as a function of conditioned acquisition, single-trial resolution was preserved rather than extracting a grand-average ERP from the experimental conditions. This allowed modeling random and fixed effects for each block of trials. We fit Bayesian hierarchical regression models with uniform priors to facilitate convergence of maximal random-effects structure, which helps maintain conservative inference for mixed-effects models [@Barr2013]. This class of models does not compute parametric $p$-values, so no $p$-values are reported here. As a reference for inferential heuristics, Bayes factors greater than 3 suggest moderate evidence against the specified null hypothesis, greater than 10 suggest strong evidence, and greater than 100 suggest decisive evidence [@Kass1995]. All analysis scripts for data manipulation, statistical modeling, and visualization are supported and contained within the markdown file that generated this document, to promote computational transparency and reproducibility. 
+
+To support the computational reproducibility of this document, we cite the following software package dependencies with their respective versions: `r cite_r("r-references.bib")`.
+
+#Results
+
+##Replicating modulation of LPP via affective stimulus presentation
+We demonstrated that our paradigm replicates previous research, that the amplitude of the LPP tends to increase as the affective characteristics of the stimulus increase. Figure\ \@ref(fig:allERP) shows grand average ERPs across all channels, averaged over the CS prediction and the CS predictor respectively, including the electrodes of interest - CP1, CP2, CP5, CP6, and Cz. Figure\ \@ref(fig:topo) shows the scalp topography of the LPP across the time window of interest (700-1000 ms). Figure\ \@ref(fig:chans) shows the ERPs averaged across all channels of interest, as well as the correlation matrix between the grand average LPP across all channels of interest. The high degree of shared variance across the time window and channels of interest suggests that averaging the channels is a reasonable strategy for limiting superfluous multiple comparisons [@Luck2017]. 
+
+Table\ \@ref(tab:tab1) shows the model comparison across all specified competing models. Table\ \@ref(tab:tab2) shows the parameter estimates for the best model. Random effects in the models included random slopes for stimulus class (Face vs. Scene) x stimulus role (CS vs. US) and block nested within subject intercepts, as well as random intercepts for each stimulus item. Figure\ \@ref(fig:mod1) plots the results of the model with the largest posterior probability. Violin plots represent the kernel density estimate for the subject-level LPP within each factor. Histograms show 40,000 samples from the posterior distribution of parameter estimates, with dashed lines indicating the bounds of the 95% credible interval. We predicted that scene CSs would have the smallest LPP, face CSs would have the second smallest LPP, face USs would have the third smallest LPP, and scene USs would have the largest LPP. The results follow these predictions.
+
+##Evidence for different learning rates as a function of \textit{OXTR}m at CpG site -934.
+Results suggest evidence for individual differences in learning rates indexed by the LPP as a function of \textit{OXTR}m at CpG site -934. As is standard practice in classical conditioning experiments, the learning rate was defined as the change of the physiological response throughout the experiment. A positive learning rate indicates transference from the US to the CS, while a negative learning rate indicates no transference from the US to the CS. The degree of change between the LPP to the CS at the beginning of the experiment relative to the end of the experiment was larger for individuals with higher \textit{OXTR}m values. 
+
+Table\ \@ref(tab:tab3) shows the model comparison across all specified competing models. Table\ \@ref(tab:tab4) shows the parameter estimates for the model with the largest posterior probability. Testing these plausible models placed the model with the largest posterior probability into a more nuanced inferential context. Random effects in the models included random slopes for stimulus class (Face CS vs. Scene CS) X CS prediction (Face US vs. Scene US) and block nested within subject intercepts. No stimulus item intercept was specified, because stimulus class for this analysis was equivalent to the stimulus item. The social dimension of the CS did not seem to impact the block x -934 methylation interaction, nor did the social dimension of the US. This can be seen in Table\ \@ref(tab:tab3), which shows the model containing the stimulus type x block x -934 methylation three-way interaction was less probable than the model with the block x -934 methylation two-way interaction. 
+
+Figure\ \@ref(fig:mod2) shows the main parameter of interest (block x -934 methylation interaction) for our hypothesis that \textit{OXTR}m modulates learning rates. Each panel represents quantiles from the site -934 methylation distribution. The block x -934 methylation interaction suggests that learning rates increase as methylation values increase. Note that the average learning rate is positive. Ribbons around the linear estimates indicate local bounds of the 95% credible interval. Histogram shows 40,000 samples from the posterior distribution of the block x -934 methylation parameter estimate, with dashed lines indicating the bounds of the 95% credible interval. Several models were specified to test the reasonable theoretical space of primary factors interacting above and beyond a simple block x -934 methylation interaction. 
+
+We predicted that increased \textit{OXTR}m would correlate with increased learning rates, represented as steeper transference of LPP magnitude from the US to the CS. Statistically, this was specified in the model as a block x -934 methylation two-way interaction, which assumes that the growth curve of the LPP from the beginning to the end of the experiment approximates a linear function across trial blocks. We predicted the slope of this linear approximation to increase as \textit{OXTR}m increases. The results follow these predictions.
+
+##Exploring habituation and sensitization across the experiment
+Our final analysis probes whether arousal indexed by behavioral judgments was sustained, increased, or decreased throughout the experiment. Figure\ \@ref(fig:beh-habit) shows that arousal judgments toward the US tended to increase across the experiment, particularly for the scene USs. This suggests that participants did not experience propositional habituation toward the US as a function of trial blocks, and may have experienced sensitization. This is because participants rated the USs more arousing at the end of the experiment relative to the beginning. 
+
+In order to explore this result further, we plotted the magnitude of the LPP toward the CSs and USs as a function of trial block throughout the experiment (see Figure\ \@ref(fig:lpp-habit)). Both CS classes show a positive linear trend across trial blocks, while both US classes show a negative linear trend across all trial blocks. Note that the degree of change is almost directly proportional for the CSs relative to the USs. Since the CS LPP time window overlaps and is confounded within the US baseline, which is subtracted from the US LPP estimate on each trial, this plot suggests that the CR is increasing across trial blocks, but the UR is likely to be relatively stable. Thus, there is little evidence for habituation, allowing us to interpret the results as reported above.
+
+#Discussion
+Our results suggest a new framework for considering biological differences in learning rates with electrophysiological brain potentials. In addition to replicating previous work on the LPP as a sensitive index for affective processing of stimulus content in images, we show that malleability of the LPP to threatening stimulus environments can be approximated as a linear function of \textit{OXTR}m. Higher levels of \textit{OXTR}m mapped onto steeper conditioned learning rates within our experimental paradigm. There was little evidence to suggest that the social dimension of the stimuli moderated this primary finding. This result is consistent with prior human imaging epigenetics research, and adds to the contemporary discussion of oxytocin as an allostatic hormone rather than a social hormone. 
+
+This work also highlights the continuing development of understanding individual differences in ERPs within affective neuroscience [@Amodio2013]. For many years, ERP and EEG research was optimized to detect reliable signal across all subjects, an approach akin to psychophysical models of repeatable laws across all humans [@Picton1992; @Kutas2011]. Since many of the low hanging fruit of ERP and EEG experimentation have already been discovered, it is crucial to begin understanding when these repeatable laws break, and which factors contribute toward their inadequate account of the variance in the data. While this report focuses on biological differences within neurotypical individuals, this research could be extended toward development of satisfactory theories that integrate psychopathological mechanisms and their downstream consequences in disordered populations. 
+
+##Limitations and suggestions for future research
+While capturing natural variability within a biological system is non-invasive and often useful for describing said system, the gold standard for causal inference involves rigorous experimentation. While this report includes an associative learning experiment, we cannot make any causal claims stating \textit{OXTR}m governs the acquisition of fear in humans. Introducing experimentation may or may not impact the system the same as reported here. If care is taken to consider the endogenous system as a critical factor for interpretation of exogenous mechanisms, experimental administration of oxytocin within the context of \textit{OXTR}m may provide a more adequate inferential modeling strategy to answer the question of how oxytocin causally impacts associative learning. Another potential caveat of these results is the assay of peripheral indices of endogenous oxytocin rather than measuring oxytocin directly in the brain. While research suggests that peripheral indices positively correlate with direct measurements from brain tissue, the distance between the two introduces an irreducible level of noise into the analysis [@Krol2019].
+
+Even just considering \textit{OXTR} epigenetics, ERPs, and conditioning processes separately, there are a myriad of orthogonal causal forces that impact these observations. For example, as clearly seen in Figure\ \@ref(fig:allERP), there are many ERPs and characteristics of the EEG signal that are sensitive to affective processing, conditioning, and visual input. These include stimulus-preceding negativity (SPN), early posterior negativity (EPN), and steady-state visual evoked fields (ssVEF), to name a few [@Yoon2016; @Moris2013; @Chien2017]. Which site along \textit{OXTR} should be measured, which ERP should be analyzed, and which conditioning procedure should be employed - all of these decisions are guided by extant literature but are necessarily constrained. This report disregards the rich multivariate landscape through which each system exists. Thus, it is necessarily true that the models reported in this paper are under-specified. One way to address mis-specification for future extensions of this work is application of non-linear machine learning techniques to excavate the complex structure of the system [@Cecotti2014]. With the added power of prediction, however, comes with discounted interpretability. While the reported models need more information infused in them to make powerful predictions, we think that the simplification of the system reported here is useful for extracting insight.
+
+While cognitive neuroscience is a powerful tool for studying the human mind, measurements from EEG recordings do not directly map onto cognitive processes or behavior [@Poldrack2006]. Instead, the scale of analysis is deeply embedded within the source of biological factors that cause the cognitive process far upstream. Ironically, this deep embedding obfuscates the mechanistic processes of mental operations. While the current research can make empirical claims about connections between epigenetic, neuronal, and elementary information processing, a more formal model accounting for the temporal complexities and acquisition of information are crucial for understanding how the learning is sourced from the reported biological factors [@Gluck1987]. Indeed, mathematical models of associative learning, such as the Rescorla-Wagner model, explicitly specify assumptions of the system and allow for generative and transparent predictions [@Siegel1996]. Finding a way to link formal models of the behavior to formal models of the brain is crucial for bridging the interplay between large ensembles of neuronal firing and behavioral output. This, of course, is not an easy task to accomplish, and requires years of research for emergence of powerful theories. 
+
+##Conclusions
+Despite the limitation of this work, we believe that our findings on individual differences in learning rates adds an important contribution to the theoretical discussions surrounding the role of oxytocin on human psychology. This work corroborates with prior imaging epigenetic studies and adds novel evidence toward markers of epigenetic modification encoded in electrophysiological brain potentials. This research is part of an ongoing conversation that casts healthy skepticism on the specificity of oxytocin's effects on highly social and cultural constructs. Rather, oxytocin may play a primitive role in signaling survival behaviors (i.e., approaching appetitive resources, avoiding aversive environments). This work enriches understanding of how the brain reflects oxytocin's allostatic functionality, by investigating its manifestation of fear acquisition embedded in electrophysiological conditioned responses.
+
+```{r, design, fig.cap = "(ref:cap1)"}
+pic_vec <- c("pic_1.png", "pic_2.png", "pic_3.png", "pic_4.png")
+pic_read <- map(pic_vec, magick::image_read)
+pic_list <- map(pic_read, image_scale, geometry = geometry_size_pixels(
+  width = 300, height = 300, preserve_aspect = FALSE))
+trial_arrow <- grid::arrow(angle = 30, length = unit(0.5, "inches"))
+
+ggdraw() +
+  draw_image(pic_list[[1]], x = -.4, y = .25, scale = .3) +
+  draw_image(pic_list[[2]], x = -.19, y = .125, scale = .3) +
+  draw_image(pic_list[[3]], x = .19, y = -.075, scale = .3) +
+  draw_image(pic_list[[4]], x = .4, y = -.2, scale = .3) +
+  annotate("text", x = .5, y = .53, label = "ITI jitter\n[~1s]",
+    family = "serif", size = 5, color = "white") + 
+  annotate("text", x = .1, y = .95, label = "Face CS [1 s]",
+    family = "serif", size = 5, color = "white") + 
+  annotate("text", x = .31, y = .83, label = "Scene US [1 s]",
+    family = "serif", size = 5, color = "white") + 
+  annotate("text", x = .69, y = .63, label = "Scene CS [1 s]",
+    family = "serif", size = 5, color = "white") + 
+  annotate("text", x = .9, y = .51, label = "Face US [1 s]",
+    family = "serif", size = 5, color = "white") + 
+  geom_segment(aes(x = 0, y = .57, xend = .98, yend = .02), 
+    arrow = trial_arrow, color = "white") + 
+  geom_segment(aes(x = .05, y = .2, xend = .38, yend = .2), 
+    color = "white") + 
+  geom_segment(aes(x = .05, y = .2, xend = .05, yend = .25), 
+    color = "white") + 
+  geom_segment(aes(x = .38, y = .2, xend = .38, yend = .25), 
+    color = "white") +
+  annotate("text", x = .215, y = .15, label = "Ex. Trial 1",
+    family = "serif", size = 5, color = "white") +
+  geom_segment(aes(x = .62, y = .8, xend = .95, yend = .8), 
+    color = "white") + 
+  geom_segment(aes(x = .62, y = .8, xend = .62, yend = .75), 
+    color = "white") + 
+  geom_segment(aes(x = .95, y = .8, xend = .95, yend = .75), 
+    color = "white") +
+  annotate("text", x = .785, y = .85, label = "Ex. Trial 2",
+    family = "serif", size = 5, color = "white") +
+  theme(plot.background = element_rect(fill="black"))
+```
+
+(ref:cap1) Schematic of the experimental design. Each trial included CS and US presentation as a 100% stimulus contingency. There were 8 blocks of 32 trials each. A distinct CS was presented for each combination of Stimulus Class and CS prediction, resulting in 4 CSs total. Each US Stimulus Class included 16 different items within its respective category, resulting in 8 presentations of each item. 
+
+```{r}
+
+bf_table <- function(bf_list){
+  
+  get_fixed_string <- str_replace_all(bf_list$Model[[1]], "\\(.*\\)", "") %>%
+    stringi::stri_replace_last_fixed("+", "") %>%
+    str_replace_all(c("1" = "Intercept Only", 
+      "stim_sep" = "Stimulus Class x CS Prediction", 
+      "stim_condition " = "Stimulus Class x Stimulus Role", 
+      "stim_seq" = "Stimulus Role",
+      "stim_type" = "Stimulus Class",
+      "block" = "Block", 
+      "site_934" = "-934 Methylation",
+      "\\*" = "x"))
+  
+  get_rand_string <- str_extract_all(bf_list$Model[[1]], "\\(.*\\)") %>%
+    str_replace_all(c("stim_sep" = "Stimulus Class x CS Prediction", 
+                      "stim_condition" = "Stimulus Class x Stimulus Role", 
+                      "subj" = "Subject Intercept",
+                      "stim_id" = "Stimulus ID Intercept",
+                      "block" = "Block" ))
+    
+tibble(`Fixed Effects Model Structure` = get_fixed_string, `Bayes Factor Against Null` = 
+  bf_list$BF[[1]])
+  
+}
+
+post_table <- function(model){
+  
+  summary(model)$fixed %>%
+    as_tibble(rownames = "Parameter") %>%
+    select(-Rhat, -Eff.Sample) %>%
+    rename(`Estimated Error` = Est.Error, `Lower Bound` = `l-95% CI`,
+           `Upper Bound` = `u-95% CI`) %>%
+    mutate(Parameter = str_replace_all(Parameter, 
+      c("stim_sep1" = "Face CS predicts Face US", 
+        "stim_sep2" = "Face CS predicts Scene US", 
+        "stim_sep3" = "Scene CS predicts Scene US", 
+        "stim_condition1" = "Scene CS", 
+        "stim_condition2" = "Face CS", 
+        "stim_condition3" = "Face US",
+        "block" = "Block", 
+        "site_934" = "-934 Methylation",
+        "\\:" = " x ")))
+  
+}
+
+tidy_erp <- function(data, labels){
+  
+  data %>%
+    gather(key = channel, value = erp, -time) %>%
+    mutate(condition = labels)
+  
+}
+
+condition_list <- list("NonSocCS", "SocCS", "SocUS", "NonSocUS")
+channel_vec <- c("CP1", "CP2", "CP5", "CP6", "Cz", "AllCPandCZ")
+
+plot_topo <- c("plot_erp_NonSocCS.txt", "plot_erp_SocCS.txt", 
+               "plot_erp_SocUS.txt", "plot_erp_NonSocUS.txt") %>%
+  map(read.table, header = TRUE, sep = "") %>%
+  map2_dfr(condition_list, tidy_erp)
+
+plot_erp <- plot_topo %>%
+  filter(channel %in% channel_vec)
+
+coord <- read_csv(file = "bio_semi_cart_coord.csv")
+
+load("lpp_data_model")
+load("cs_us_data")
+load("eprime_data_model")
+load("best_mods")
+load("bf_1")
+load("bf_2")
+marginal_list <- map(best_mods, marginal_effects)
+interaction_marg <- marginal_effects(best_mods[[2]],
+  int_conditions = list(site_934 = quantile))
+my_purple <- rgb(51,0,102, maxColorValue = 255)
+my_green <- rgb(0,102,51, maxColorValue = 255)
+
+plot_waveform <- function(data){
+  
+  data %>%
+    ggplot(aes(x = time, y = erp)) + 
+    geom_line(aes(color = factor(condition)), lwd = .5) + 
+    geom_vline(xintercept = 0) +
+    geom_hline(yintercept = 0) + 
+    scale_x_continuous(breaks = seq(-200, 1000, 300)) +
+    scale_color_brewer(palette = "Set1", name = "",
+      labels = c("Scene CS", "Scene US", "Face CS", "Face US")) +
+    labs(x = "Time From Stimulus Onset (ms)", y = "Amplitude (uV)") + 
+    theme(axis.text.x = element_text(size = 10), legend.position = "bottom")
+    
+}
+
+plot_stimulus_effect <- function(data, marginal_data, condition, dv){
+  
+  select_effect <- rlang::names2(marginal_data) %>%
+    tidyselect::vars_select(!!condition)
+  
+  plot_data <- data %>%
+    group_by(subj, !!condition) %>%
+    summarize(dv = mean(!!dv))
+  
+  marginal_data[[select_effect]] %>%
+    ggplot(aes(x = !!condition, y = estimate__, group = 1)) +
+    geom_point(size = 2) +
+    geom_errorbar(aes(ymin = lower__, ymax = upper__), width = 0.5) +
+    geom_violin(data = plot_data, aes(y = dv, group = !!condition,
+                                      fill = !!condition), alpha = 0.5) +
+    scale_fill_brewer(palette = "Set1") + 
+    theme(legend.position = "none")
+  
+}
+
+plot_post_param <- function(data, effect){
+  
+  post <- posterior_samples(data)
+  
+  quantiles <- post %>%
+    select(!!effect) %>%
+    as_vector() %>%
+    quantile(c(.025, .975))
+  
+  post %>%
+    ggplot(aes(x = !!effect)) +
+    geom_histogram(bins = 100) + 
+    geom_vline(xintercept = quantiles,
+               lty = 2, size = 1.25) + 
+    geom_vline(xintercept = 0, color = "blue") + 
+    geom_hline(yintercept = 0) +
+    labs(y = "") + 
+    theme(axis.title.y = element_text(margin = margin(r = 0)))
+  
+}
+
+plot_scatter_effect <- function(data, effect){
+  
+  select_effect <- rlang::names2(data) %>%
+    tidyselect::vars_select(!!effect)
+  
+  data[[select_effect]] %>%
+    ggplot(aes(x = !!effect, y = estimate__)) +
+    geom_line(size = 1.25) +
+    geom_ribbon(aes(ymin = lower__, ymax = upper__), alpha = .3)
+  
+}
+
+plot_interaction <- function(data, effect, factor1, factor2){
+
+select_effect <- rlang::names2(data) %>%
+  tidyselect::vars_select(!!effect)
+
+data[[select_effect]] %>%
+  ggplot(aes(x = !!factor1, y = estimate__)) +
+  geom_line(aes(color = !!factor2), size = 1.25) +
+  geom_ribbon(aes(ymin = lower__, ymax = upper__,
+  group = !!factor2, fill = !!factor2), alpha = .3) 
+
+}
+
+scaled_block <- lpp_data_model %>%
+  select(block) %>%
+  unique() %>%
+  as_vector()
+
+get_block_effects <- function(data, dv){
+  
+  data %>%
+    group_by(block, stim_condition) %>%
+    summarize(avg_dv = mean(!!dv)) %>%
+    ggplot(aes(x = block, y = avg_dv)) + 
+    geom_line() + 
+    geom_point() + 
+    geom_smooth(method = "lm", color = my_purple) + 
+    scale_x_continuous(breaks = scaled_block,
+                       labels = 1:8)
+  
+}
+
+extra_channels <- 
+  c("AllCPandCZ", "LPPand3Parietal", "CPRight", "CPLeft", "Filler3", "Filler4")
+
+theme_set(theme_light())
+theme_update(text = element_text(family="serif"), 
+axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+strip.background = element_rect(fill = "black"))
+```
+
+```{r, allERP, fig.height = 8, fig.cap = "(ref:cap2)"}
+
+plot_waveform(plot_topo %>% filter((!channel %in% extra_channels))) + 
+  facet_wrap(.~channel, nrow = 8) + 
+  theme(axis.text.x = element_blank()) + 
+  labs(x = "Time From Stimulus Onset (-200 to 1000 ms)")
+
+```
+
+(ref:cap2) Grand average ERPs across all channels for each stimulus class and stimulus role combination. A priori electrodes of interest include CP1, CP2, CP5, CP6, and Cz.
+
+```{r, topo, fig.height = 5, fig.cap = "(ref:cap3)"}
+
+topo_plot <- plot_topo %>%
+  rename(electrode = channel, amplitude = erp) %>%
+  merge(coord, by = "electrode") %>%
+  topoplot(time_lim = c(700, 1000),
+    highlights = c("CP1", "CP2", "CP5", "CP6", "Cz"), groups = "condition") +
+  facet_wrap(.~condition, labeller =
+    labeller(condition = c(NonSocCS = "Scene CS",  SocCS = "Face CS",
+      SocUS = "Face US", NonSocUS = "Scene US"))) +
+  labs(x = "", y = "") +
+  theme_set(theme_light()) +
+  theme(axis.text = element_blank(),
+        axis.line.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.margin = margin(0, 0, 0, 0)) 
+
+suppressWarnings(print(topo_plot))
+
+theme_set(theme_light())
+theme_update(text = element_text(family="serif"),
+axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+strip.background = element_rect(fill = "black"))
+
+```
+
+(ref:cap3) Topographical scalps maps averaged across the time window of interest (700-1000 ms). White points indicate scalp location for channels of interest. 
+
+```{r, chans, fig.height = 7,  fig.cap = "(ref:cap4)"}
+p1 <- plot_waveform(plot_erp %>% filter(channel == "AllCPandCZ")) +
+  #facet_wrap(.~condition) +
+  geom_vline(xintercept = c(700, 1000), linetype = 2)
+
+get_lower_tri <- function(x){
+  x[lower.tri(x)] <- NA
+  return(x)
+}
+
+p2 <- cs_us_data %>%
+  select(subj, Cp1_corrected, Cp2_corrected, Cp5_corrected, Cp6_corrected,
+    Cz_corrected) %>%
+  group_by(subj) %>%
+  summarize_all(mean) %>%
+  select(-subj) %>%
+  cor() %>%
+  get_lower_tri() %>%
+  reshape2::melt(na.rm = TRUE) %>%
+  mutate(Var1 = str_replace(Var1, "_corrected", ""),
+    Var2 = str_replace(Var2, "_corrected", "")) %>%
+  ggplot(aes(fct_inorder(Var1), fct_rev(fct_inorder(Var2)), fill = value)) + 
+  geom_tile() + 
+  scale_fill_distiller(name = "Correlation coefficient", palette = "PRGn") +
+  labs(x = "", y = "") +
+  theme_classic() + 
+  theme(text = element_text(size = 14, family = "serif"),
+    legend.justification = c(1, 0), 
+    legend.position = c(1, .5))
+
+gridExtra::grid.arrange(p1, p2, nrow = 2)
+
+```
+
+(ref:cap4) The LPP averaged over channels of interest. Dashed lines indicate the analyzed time window. The accompanying Pearson's correlation matrix shows high degree of shared variance across channels of interest, indicating that averaging them is appropriate for testing the LPP component. 
+
+```{r, mod1, fig.height = 6, fig.cap = "(ref:cap5)"}
+theme_set(theme_classic())
+theme_update(text = element_text(family="serif"),
+  axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)))
+
+p1 <- plot_stimulus_effect(lpp_data_model, 
+        marginal_list[[1]], quo(stim_condition), quo(avg_lpp)) + 
+  labs(x = "", y = "LPP Amplitude (uV)") + 
+  scale_x_discrete(labels = c("Scene CS", "Face CS", "Face US", "Scene US"))
+p2 <- plot_post_param(best_mods[[1]], quo(`b_stim_condition1`)) + 
+  labs(x = "Scene CS Beta", y = "Count")
+p3 <- plot_post_param(best_mods[[1]], quo(`b_stim_condition2`)) + 
+  labs(x = "Face CS Beta")
+p4 <- plot_post_param(best_mods[[1]], quo(`b_stim_condition3`)) + 
+  labs(x = "Face US Beta")
+
+gridExtra::grid.arrange(p1, p2, p3, p4, nrow = 2, 
+  layout_matrix = cbind(c(1, 2), c(1, 3), c(1, 4)))
+```
+
+(ref:cap5) Plotted results from the model in Table\ \@ref(tab:tab2). Violin plots represent the kernel density estimate for the subject-level LPP within each factor. Histograms show 40,000 samples from the posterior distribution of parameter estimates, with dashed lines indicating the bounds of the 95% credible interval. The vertical blue line indicates the x-axis location of a hypothetical null observation.
+
+```{r mod2, fig.height = 7, fig.cap = "(ref:cap6)"}
+
+quant_934 <- cs_us_data %>%
+  group_by(subj) %>%
+  summarize(site_934_quant = max(site_934_unscaled)) %>%
+  select(-subj) %>%
+  as_vector() %>%
+  quantile()
+
+temp_plot <- plot_interaction(interaction_marg, quo(`block:site_934`), quo(block),
+  quo(site_934))
+levels(temp_plot$data$site_934) <- quant_934 %>%
+  unname() %>%
+  rev() %>% 
+  format(nsmall = 2) %>%
+  paste0("%")
+
+p1 <- temp_plot +
+  facet_grid(~ fct_rev(site_934)) +
+  scale_color_discrete(name = "-934 Methylation") +
+  scale_fill_discrete(name = "-934 Methylation") +
+  scale_x_continuous(breaks = c(-1, 1),
+    labels = c("Start", "End")) + 
+  labs(x = "Sequence of Trial Blocks", y = "LPP Amplitude (uV)")
+
+p2 <- plot_post_param(best_mods[[2]], quo(`b_block:site_934`)) + 
+  labs(x = "Posterior Distribution of Block x -934 Methylation Interaction Beta",
+       y = "Count")
+
+gridExtra::grid.arrange(p1, p2, nrow = 2)
+```
+
+(ref:cap6) Plotted results from the main parameter of interest in Table\ \@ref(tab:tab4). Each panel represents quantiles from the site -934 methylation distribution. The block x -934 Methylation interaction suggests that learning rates increase as methylation values increase. Note that the average learning rate is positive. Ribbons around the linear estimates indicate local bounds of the 95% credible interval. Histogram shows 40,000 samples from the posterior distribution of the block x -934 methylation parameter estimate, with dashed lines indicating the bounds of the 95% credible interval. The vertical blue line indicates the x-axis location of a hypothetical null observation.
+
+```{r beh-habit, fig.cap = "(ref:cap7)"}
+
+get_block_effects(eprime_data_model, quo(arousal_resp_unscaled)) + 
+  facet_wrap(~stim_condition, scales = "free", labeller = 
+  labeller(stim_condition = c(NonSocUS = "Scene US", SocUS = "Face US"))) + 
+  labs(x = "Sequence of Trial Blocks", y = "US Arousal Judgment")
+
+```
+
+(ref:cap7) Arousal judgments toward the US are not decreasing throughout the experiment. This suggests that participants are not habituating to the US, and may be reporting sensitization, particularly for the scene USs.  
+
+```{r, lpp-habit, fig.height = 6, fig.cap = "(ref:cap8)"}
+
+get_block_effects(lpp_data_model, quo(avg_lpp)) + 
+  facet_wrap(~stim_condition, scales = "free",
+    labeller = labeller(stim_condition = c(sceneCS = "Scene CS",  
+    faceCS = "Face CS", faceUS = "Face US", sceneUS = "Scene US"))) +
+  labs(x = "Sequence of Trial Blocks", y = "LPP Amplitude (uV)")
+
+```
+
+(ref:cap8) Exploratory plot showing grand average LPP trends across trial blocks. Both CS classes show a positive linear trend across trial blocks, while both US classes show a negative linear trend across all trial blocks. Note that the degree of change is almost directly proportional for the CSs relative to the USs. Since the CS LPP time window overlaps and is confounded within the US baseline, which is subtracted from the US LPP estimate on each trial, this plot suggests that the CR is increasing across trial blocks, but the UR is likely to be relatively stable. 
+
+```{r tab1, results = "asis"}
+map_dfr(bf_1, bf_table) %>%
+  papaja::apa_table(caption = "Model comparison: Replicating affective stimulus effect on the LPP", note = "Bayes factors compared against the null model. The null model included stimulus role (CS vs. US) as a fixed effect, random slopes for stimulus class (Face vs. Scene) x stimulus role (CS vs. US) and block nested within subject intercepts, as well as random intercepts for each stimulus item. As an inferential heuristic, Bayes factors greater than 10 are considered strong evidence for the alternative hypothesis.")
+```
+
+```{r tab2, results = "asis"}
+post_table(best_mods[[1]]) %>%
+    papaja::apa_table(caption = "Bayesian parameter estimates for best model testing affective stimulus effect on the LPP", note = "Each parameter besides the intercept test for evidence of affective modulation on the LPP. Factor contrasts are orthogonal sums, and should be interpreted as deviations from the grand mean. Lower bound and upper bound indicate the range for Bayesian 95% Credible Intervals.")
+```
+
+```{r tab3, results = "asis"}
+map_dfr(bf_2, bf_table) %>%
+  papaja::apa_table(caption = "Model comparison: Evidence for modulation of learning rates as a function of methylation at -934", note = "Bayes factors compared against the null model. The null model included stimulus class (Face vs. Scene) x CS prediction (Face US vs. Scene US) as fixed effects, random slopes for stimulus class (Face vs. Scene) x CS prediction (Face US vs. Scene US) and block nested within subject intercepts. As an inferential heuristic, Bayes factors greater than 10 are considered strong evidence for the alternative hypothesis.")
+```
+
+```{r tab4, results = "asis"}
+post_table(best_mods[[2]]) %>%
+    papaja::apa_table(caption = "Bayesian parameter estimates for best model testing individual differences in learning rates", note = "The block x -934 methylation parameter tests for individual differences in learning rates. Factor contrasts are orthogonal sums, and should be interpreted as deviations from the grand mean. All continuous features are normalized around 0. Lower bound and upper bound indicate the range for Bayesian 95% Credible Intervals.")
+```
+
+\newpage
+
+# References
+```{r create_r-references}
+r_refs(file = "r-references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup
